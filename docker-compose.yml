@@ -1,0 +1,54 @@
+version: "3.7"
+services:
+  pg:
+    container_name: "pg"
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      # - "POSTGRES_PASSWORD=${DB_PASS}" # using an environment variable
+      - "POSTGRES_USER=your_username"
+      - "POSTGRES_PASSWORD=your_password"
+    volumes:
+      # - ./pg:/docker-entrypoint-initdb.d/ # file
+      - local-data:/pg/docker-entrypoint-initdb.d/ # container
+
+  mongo:
+    container_name: "mongo"
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: your_username
+      MONGO_INITDB_ROOT_PASSWORD: your_password
+    ports:
+      - 27017:27017
+    restart: always
+    volumes:
+      # - ./mongo:/data/db # file
+      - local-data:/mongo/data/db # container
+
+  redis:
+    container_name: "redis"
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    depends_on:
+      - pg
+    ports:
+      - 8080:8080
+
+  meilisearch:
+    image: getmeili/meilisearch:v0.20.0
+    command: ./meilisearch --master-key=your_key --no-analytics=true
+    ports:
+      - target: 7700
+        published: 7700
+        protocol: tcp
+
+volumes:
+  local-data:
